@@ -26,6 +26,7 @@ from dht.utils import digest
 from market.profile import Profile
 from market.contracts import Contract, check_order_for_payment
 from market.btcprice import BtcPrice
+from market.dashprice import DashPrice
 from net.upnp import PortMapper
 from api.utils import sanitize_html
 
@@ -1418,6 +1419,22 @@ class OpenBazaarAPI(APIResource):
             except KeyError:
                 pass
         request.write(json.dumps({"currencyCodes": BtcPrice.instance().prices}))
+        request.finish()
+        return server.NOT_DONE_YET
+
+    @GET('^/api/v1/dash_price')
+    @authenticated
+    def dash_price(self, request):
+        request.setHeader('content-type', "application/json")
+        if "currency" in request.args:
+            try:
+                result = DashPrice.instance().get(request.args["currency"][0].upper(), False)
+                request.write(json.dumps({"btcExchange":result, "currencyCodes":DashPrice.instance().prices}))
+                request.finish()
+                return server.NOT_DONE_YET
+            except KeyError:
+                pass
+        request.write(json.dumps({"currencyCodes": DashPrice.instance().prices}))
         request.finish()
         return server.NOT_DONE_YET
 

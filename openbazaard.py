@@ -24,6 +24,7 @@ from market import network
 from market.listeners import MessageListenerImpl, BroadcastListenerImpl, NotificationListenerImpl
 from market.contracts import check_unfunded_for_payment
 from market.btcprice import BtcPrice
+from market.dashprice import DashPrice
 from market.profile import Profile
 from market.transactions import rebroadcast_unconfirmed
 from net.heartbeat import HeartbeatFactory
@@ -195,12 +196,16 @@ def run(*args):
 
     btcPrice = BtcPrice()
     btcPrice.start()
+    dashPrice = DashPrice()
+    dashPrice.start()
 
     # key generation
     KeyChain(db, start_server, heartbeat_server)
 
     reactor.run()
 
+    dashPrice.closethread()
+    dashPrice.join(1)
     btcPrice.closethread()
     btcPrice.join(1)
 
